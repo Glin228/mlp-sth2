@@ -239,6 +239,7 @@ let running = false;
 async function main(){
     if (running) return;
     running = true;
+    console.log("Entered main()");
     document.querySelector("div#main p:nth-child(1)").remove();
 
     ctx.drawImage(document.getElementById("menuscreen"), 0, 0);
