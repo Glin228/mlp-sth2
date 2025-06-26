@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoot The Haters!</title>
+    <style>
+        canvas{
+            border: solid pink 2px;
+        }
+
+        p{
+            cursor: pointer;
+            color: white;
+            width: 600px;
+        }
+        body{
+            background-color: black;
+        }
+        #main{
+            margin: auto;
+            display: block;
+            width: max-content
+        }
+    </style>
+</head>
+<body>
+    <div id="main">
+        <p>Press any key or tap the pink square.</p>
+        <canvas id="screen" width="600" height="600"></canvas>
+    </div>
+    <img src="death_screen.jpg" style="display: none;" id="deathscreen">
+    <img src="menu_screen.jpg" style="display: none;" id="menuscreen">
+    <img src="victory_screen.jpg" style="display: none;" id="victoryscreen">
+</body>
+<script src="index.js"></script>
+</html>
