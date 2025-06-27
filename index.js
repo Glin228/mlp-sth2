@@ -52,7 +52,11 @@ class Sprite{
             throw new Error(`Sprite coords not set!`);
         }
         let img = this._getImage();
-        ctx.drawImage(img, this.x-img.width*this.scale/2, this.y-img.height*this.scale/2, img.width*this.scale, img.height*this.scale);
+        try{
+            ctx.drawImage(img, this.x-img.width*this.scale/2, this.y-img.height*this.scale/2, img.width*this.scale, img.height*this.scale);
+        } catch (e){
+            console.log(`Can't render ${this}. Cause: ${e}`);
+        }
     }
     getRect(){
         let img = this._getImage();
@@ -62,6 +66,9 @@ class Sprite{
             {x: this.x-img.width*this.scale/2, y: this.y+img.height*this.scale/2},
             {x: this.x+img.width*this.scale/2, y: this.y+img.height*this.scale/2},
         ];
+    }
+    toString(){
+        return JSON.stringify(this);
     }
 }
 
@@ -211,7 +218,7 @@ function update(){
     if (rockets.length>0 && rockets.at(-1).x > 600){
         rockets.pop();
     }
-    let dt = Date.now() - startT;
+    dt = Date.now() - startT;
     ctx.font = "24px italic";
     ctx.fillStyle = "red";
     ctx.fillText(`${Math.round(dt/1000)}/${Math.round(WIN_TIMEOUT/1000)}`, 10, 40);
@@ -233,8 +240,9 @@ const player = new Sprite(["stand.png"], 1, 0.04);
 let update_interval;
 let startT;
 let RPG;
-const showintro = true;
+const showintro = false;
 let govno;
+let dt;
 let running = false;
 async function main(){
     if (running) return;
@@ -320,7 +328,8 @@ async function main(){
     document.addEventListener("keydown", (kp)=>{pressedKeys[kp.key] = true});
     document.addEventListener("keyup", (kp)=>{pressedKeys[kp.key] = false});
     document.addEventListener("keypress", (kp)=>{
-        if (kp.key === " " && canLaunch){
+        console.log(dt);
+        if (kp.key === " " && canLaunch && dt<=WIN_TIMEOUT){
             rockets.push(new Rocket());
             canLaunch = false;
             let unreadyrpg = new Image();
@@ -336,6 +345,32 @@ async function main(){
             flySnd.play();
         }
     });
+    document.getElementById("upbtn")
+    .addEventListener("mousedown", ()=>pressedKeys.w=true);
+    document.getElementById("upbtn")
+    .addEventListener("mouseup", ()=>pressedKeys.w=false);
+    document.getElementById("downbtn")
+    .addEventListener("mousedown", ()=>pressedKeys.s=true);
+    document.getElementById("downbtn")
+    .addEventListener("mouseup", ()=>pressedKeys.s=false);
+    document.getElementById("firebtn")
+    .addEventListener("click", ()=>{
+        console.log(dt);
+        if (canLaunch && dt<=WIN_TIMEOUT){
+            rockets.push(new Rocket());
+            canLaunch = false;
+            let unreadyrpg = new Image();
+            unreadyrpg.src = "reloading.png";
+            unreadyrpg.onload = () => RPG.images = [unreadyrpg];
+            setTimeout(()=>{
+                canLaunch=true;
+                let readyrpg = new Image();
+                readyrpg.src = "ready.png";
+                readyrpg.onload = () => RPG.images = [readyrpg];
+            }, 1500);
+            launchSnd.play();
+            flySnd.play();
+        }});
 }
 
 canvas.addEventListener("click", ()=>setTimeout(main, 200));

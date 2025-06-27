@@ -22,12 +22,46 @@
             display: block;
             width: max-content
         }
+
+        #main div{
+            width: 100px;
+            height: 100px;
+            opacity: 50%;
+            margin: 5px;
+        }
+
+        #main div:hover{
+            opacity: 100%;
+        }
+
+        #main div p{
+            font-size: 50px;
+            line-height: 0;
+            text-align: center;
+        }
+
+        #downbtn{
+            background-image: url("down-btn.png");
+        }
+
+        #upbtn{
+            background-image: url("up-btn.png");
+        }
+
+        #firebtn{
+            background-image: url("rocket-btn.png");
+            margin-top: -150px!important;
+            margin-left: 150px!important;
+        }
     </style>
 </head>
 <body>
     <div id="main">
         <p>Press any key or tap the pink square.</p>
         <canvas id="screen" width="600" height="600"></canvas>
+        <div id="upbtn"></div>
+        <div id="downbtn"></div>
+        <div id="firebtn"></div>
     </div>
     <img src="death_screen.jpg" style="display: none;" id="deathscreen">
     <img src="menu_screen.jpg" style="display: none;" id="menuscreen">
