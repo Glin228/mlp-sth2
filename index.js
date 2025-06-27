@@ -240,7 +240,7 @@ const player = new Sprite(["stand.png"], 1, 0.04);
 let update_interval;
 let startT;
 let RPG;
-const showintro = false;
+const showintro = true;
 let govno;
 let dt;
 let running = false;
