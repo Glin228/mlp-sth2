@@ -33,7 +33,7 @@ walk2.src = "walk2.png";
 let launched = 0;
 let popal = 0;
 
-const WIN_TIMEOUT = 300_000;
+const WIN_TIMEOUT = 180_000;
 
 class Sprite{
     constructor(imagesrcs, animdelay, scale = 1){
