@@ -236,7 +236,6 @@ function umer(){
     clearTimeout(govno);
     spawnenemies = false;
     ctx.drawImage(document.getElementById("actualdeathscreen"), 0, 0);
-    win.play();
     document.addEventListener("keypress", (kp)=>{
         if (kp.key === "Enter"){
             //console.log("how");
@@ -249,8 +248,6 @@ function umer(){
     document.body.style.animationIterationCount = "infinite";
     new Audio("Screamer.mp3").play();
     new Audio("FemurBreaker.ogg").play();
-    delete win;
-    delete game_over;
 }
 
 function Spawn(){
