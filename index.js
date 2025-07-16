@@ -249,6 +249,8 @@ function umer(){
     document.body.style.animationIterationCount = "infinite";
     new Audio("Screamer.mp3").play();
     new Audio("FemurBreaker.ogg").play();
+    delete win;
+    delete game_over;
 }
 
 function Spawn(){
