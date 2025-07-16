@@ -8,6 +8,7 @@ let drones = [];
 let grenades = [];
 const ENEMY_SPAWN_MIN = 750;
 const ENEMY_SPAWN_DELTA = 1100;
+const SOUND_VOL = 0.1;
 const launchSnd = new Audio("launch.wav");
 const flySnd = new Audio("rocketfly.wav");
 const game_over = new Audio("game_over.mp3");
@@ -161,7 +162,6 @@ class Grenade extends Sprite{
             this.yv+=0.3;
             this.y+=this.yv;
         } else {
-            explosions.push(new GrenadeExplosion());
             this.delete_me = true;
         }
         this.draw()
@@ -253,7 +253,7 @@ function update(){
     }
     explosions.forEach((v)=>{v.update()});
     rockets.forEach((v)=>{v.update()});
-    drones.forEach((v)=>{v.update()});
+    drones.forEach((v)=>{if(v){v.update()}});
     grenades.forEach((v)=>{v.update()});
     RPG.draw();
     for (let r in rockets){
@@ -294,8 +294,10 @@ function update(){
             break;
         }
         if (grenades[g].delete_me){
+            explosions.push(new GrenadeExplosion(grenades[g].x, grenades[g].y));
             [grenades[g], grenades[-1]] = [grenades[-1], grenades[g]];
             grenades.pop();
+            
         }
     }
     for (d in drones){
@@ -318,7 +320,7 @@ const player = new Sprite(["stand.png"], 1, 0.04);
 let update_interval;
 let startT;
 let RPG;
-let showintro = false;
+let showintro = true;
 let govno;
 let dt;
 let running = false;
@@ -331,6 +333,17 @@ async function main(){
 
     ctx.drawImage(document.getElementById("menuscreen"), 0, 0);
     let menusong = new Audio("menu.mp3");
+    //I hate myself.
+    [
+        launchSnd,
+        flySnd,
+        game_over,
+        win,
+        story,
+        game,
+        explosionSnd,
+        menusong
+    ].forEach(v=>v.volume = SOUND_VOL);
     menusong.play()
     await new Promise((res, rej)=>{
         document.addEventListener("keypress", (kp)=>{
@@ -403,7 +416,7 @@ async function main(){
     player.x = 50;
     player.y = 300;
     RPG = new Sprite(["ready.png"], 1, 0.1);
-    g_launcher = setInterval(()=>drones.push(new Drone(marines.at(Math.min(marines.length-1, 5)))), 10000);
+    g_launcher = setInterval(()=>drones.push(new Drone(marines.at(Math.min(marines.length-1, 5)))), 10_000);
     Spawn();
     document.addEventListener("keydown", (kp)=>{pressedKeys[kp.key] = true});
     document.addEventListener("keyup", (kp)=>{pressedKeys[kp.key] = false});
