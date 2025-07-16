@@ -4,6 +4,8 @@ let marines = [];
 let rockets = [];
 let explosions = [];
 let corpses = [];
+let drones = [];
+let grenades = [];
 const ENEMY_SPAWN_MIN = 750;
 const ENEMY_SPAWN_DELTA = 1100;
 const launchSnd = new Audio("launch.wav");
@@ -27,7 +29,7 @@ walk1.src = "walk1.png";
 let walk2 = new Image();
 walk2.src = "walk2.png";
 
-const WIN_TIMEOUT = 120_000;
+const WIN_TIMEOUT = 300_000;
 
 class Sprite{
     constructor(imagesrcs, animdelay, scale = 1){
@@ -117,6 +119,62 @@ class Explosion extends Sprite{
     }
 }
 
+class Drone extends Sprite{
+    constructor(parentmarine){
+        super(["drone.png"], 1, 0.02);
+        this.x = parentmarine.x;
+        this.y = parentmarine.y;
+        this.state = "take_off";
+        this.p_marine = parentmarine;
+    }
+    update(){
+        if (this.state === "take_off"){
+            this.y -= 2;
+            if (Math.max(this.y - player.y, this.y - this.p_marine.y) < -70){
+                this.state = "flight";
+            }
+        } else if (this.state === "flight"){
+            this.x -= 1;
+            if (Math.floor(this.x) == Math.floor(player.x)){
+                this.state = "wait";
+                setTimeout(()=>this.state="flyaway", 1000);
+                grenades.push(new Grenade(this));
+            }
+        } else if (this.state === "flyaway"){
+            this.x += 3;
+        }
+        this.draw();
+    }
+}
+
+class Grenade extends Sprite{
+    constructor(parentdrone){
+        super(["grenade.png"], 1, 0.01);
+        this.x = parentdrone.x;
+        this.y = parentdrone.y;
+        this.target_y = parentdrone.y + 80;
+        this.yv = 0;
+        this.delete_me = false;
+    }
+    update(){
+        if(this.y < this.target_y){
+            this.yv+=0.3;
+            this.y+=this.yv;
+        } else {
+            explosions.push(new GrenadeExplosion());
+            this.delete_me = true;
+        }
+        this.draw()
+    }
+}
+
+class GrenadeExplosion extends Explosion{
+    //TODO: change this explosion to another explosion
+    constructor(x, y){
+        super(x, y);
+    }
+}
+
 function doCollide(r1, r2) {
     if (r1 === undefined || r2 === undefined) return false;
     const getBounds = (rect) => {
@@ -169,7 +227,7 @@ function vyigral(){
 function Spawn(){
     if(!spawnenemies) return;
     marines.push(new Marine());
-    setTimeout(Spawn, Math.random()*ENEMY_SPAWN_MIN+ENEMY_SPAWN_DELTA);
+    setTimeout(Spawn, Math.random()*ENEMY_SPAWN_DELTA+ENEMY_SPAWN_MIN);
 }
 
 function update(){
@@ -195,6 +253,8 @@ function update(){
     }
     explosions.forEach((v)=>{v.update()});
     rockets.forEach((v)=>{v.update()});
+    drones.forEach((v)=>{v.update()});
+    grenades.forEach((v)=>{v.update()});
     RPG.draw();
     for (let r in rockets){
         for (let m in marines){
@@ -229,6 +289,24 @@ function update(){
             proigral();
         }
     }
+    for (g in grenades){
+        if (grenades[g] === undefined){
+            break;
+        }
+        if (grenades[g].delete_me){
+            [grenades[g], grenades[-1]] = [grenades[-1], grenades[g]];
+            grenades.pop();
+        }
+    }
+    for (d in drones){
+        if (drones[d] === undefined){
+            break;
+        }
+        if (drones[d].x > 610){
+            [drones[d], drones[-1]] = [drones[-1], drones[d]];
+            drones.pop();
+        }
+    }
     if (dt>WIN_TIMEOUT){
         game.pause();
         clearTimeout(govno);
@@ -240,10 +318,11 @@ const player = new Sprite(["stand.png"], 1, 0.04);
 let update_interval;
 let startT;
 let RPG;
-const showintro = true;
+let showintro = false;
 let govno;
 let dt;
 let running = false;
+let g_launcher;
 async function main(){
     if (running) return;
     running = true;
@@ -267,41 +346,41 @@ async function main(){
     story.play();
     setTimeout(()=>{
         let slide = new Image();
-        slide.src = "story1.png";
+        slide.src = "story/1.png";
         slide.onload = ()=>ctx.drawImage(slide, 0, 0);
     }, 1000);
     setTimeout(()=>{
         let slide = new Image();
-        slide.src = "story2.jpg";
+        slide.src = "story/2.jpg";
         slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 11000);
+    }, 16000);
     setTimeout(()=>{
         let slide = new Image();
-        slide.src = "story3.jpg";
-        slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 21000);
-    setTimeout(()=>{
-        let slide = new Image();
-        slide.src = "story4.jpg";
+        slide.src = "story/3.jpg";
         slide.onload = ()=>ctx.drawImage(slide, 0, 0);
     }, 31000);
     setTimeout(()=>{
         let slide = new Image();
-        slide.src = "story5.jpg";
+        slide.src = "story/4.jpg";
         slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 41000);
+    }, 46000);
     setTimeout(()=>{
         let slide = new Image();
-        slide.src = "story6.jpg";
+        slide.src = "story/5.jpg";
         slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 51000);
+    }, 61000);
+    setTimeout(()=>{
+        let slide = new Image();
+        slide.src = "story/6.jpg";
+        slide.onload = ()=>ctx.drawImage(slide, 0, 0);
+    }, 76000);
 
     await new Promise((res, rej)=>{
-        setTimeout(res, 51000);
+        setTimeout(res, 76000);
     });
     } else {
         let slide = new Image();
-        slide.src = "story6.jpg";
+        slide.src = "story/6.jpg";
         slide.onload = ()=>ctx.drawImage(slide, 0, 0);
     }
     await new Promise((res, rej)=>{
@@ -318,12 +397,13 @@ async function main(){
     govno = setTimeout(()=>{
         game.currentTime = 0;
         game.play();
-    }, 112_000);
+    }, 300_000);
     startT = Date.now();
     update_interval = setInterval(()=>{update()}, 20);
     player.x = 50;
     player.y = 300;
     RPG = new Sprite(["ready.png"], 1, 0.1);
+    g_launcher = setInterval(()=>drones.push(new Drone(marines.at(Math.min(marines.length-1, 5)))), 10000);
     Spawn();
     document.addEventListener("keydown", (kp)=>{pressedKeys[kp.key] = true});
     document.addEventListener("keyup", (kp)=>{pressedKeys[kp.key] = false});
@@ -340,19 +420,19 @@ async function main(){
                 let readyrpg = new Image();
                 readyrpg.src = "ready.png";
                 readyrpg.onload = () => RPG.images = [readyrpg];
-            }, 1500);
+            }, 1000);
             launchSnd.play();
             flySnd.play();
         }
     });
     document.getElementById("upbtn")
-    .addEventListener("mousedown", ()=>pressedKeys.w=true);
+    .addEventListener("touchstart", ()=>pressedKeys.w=true);
     document.getElementById("upbtn")
-    .addEventListener("mouseup", ()=>pressedKeys.w=false);
+    .addEventListener("touchend", ()=>pressedKeys.w=false);
     document.getElementById("downbtn")
-    .addEventListener("mousedown", ()=>pressedKeys.s=true);
+    .addEventListener("touchstart", ()=>pressedKeys.s=true);
     document.getElementById("downbtn")
-    .addEventListener("mouseup", ()=>pressedKeys.s=false);
+    .addEventListener("touchend", ()=>pressedKeys.s=false);
     document.getElementById("firebtn")
     .addEventListener("click", ()=>{
         console.log(dt);
@@ -367,7 +447,7 @@ async function main(){
                 let readyrpg = new Image();
                 readyrpg.src = "ready.png";
                 readyrpg.onload = () => RPG.images = [readyrpg];
-            }, 1500);
+            }, 1000);
             launchSnd.play();
             flySnd.play();
         }});
