@@ -20,6 +20,7 @@ let pressedKeys = {};
 const explosionSnd = new Audio("explosion.mp3");
 let explosion_srcs = [];
 let spawnenemies = true;
+const DEATH_RANGE = 70;
 for (let i = 1; i<17; i++){
     explosion_srcs.push(`explosion/${i}.png`);
 }
@@ -29,6 +30,8 @@ let walk1 = new Image();
 walk1.src = "walk1.png";
 let walk2 = new Image();
 walk2.src = "walk2.png";
+let launched = 0;
+let popal = 0;
 
 const WIN_TIMEOUT = 300_000;
 
@@ -122,16 +125,16 @@ class Explosion extends Sprite{
 
 class Drone extends Sprite{
     constructor(parentmarine){
-        super(["drone.png"], 1, 0.02);
+        super(["drone.png"], 1, 0.05);
         this.x = parentmarine.x;
         this.y = parentmarine.y;
         this.state = "take_off";
-        this.p_marine = parentmarine;
+        this.p_marine_y = parentmarine.y;
     }
     update(){
         if (this.state === "take_off"){
             this.y -= 2;
-            if (Math.max(this.y - player.y, this.y - this.p_marine.y) < -70){
+            if (Math.max(this.y - player.y, this.y - this.p_marine_y) < -70){
                 this.state = "flight";
             }
         } else if (this.state === "flight"){
@@ -150,7 +153,7 @@ class Drone extends Sprite{
 
 class Grenade extends Sprite{
     constructor(parentdrone){
-        super(["grenade.png"], 1, 0.01);
+        super(["grenade.png"], 1, 0.02);
         this.x = parentdrone.x;
         this.y = parentdrone.y;
         this.target_y = parentdrone.y + 80;
@@ -162,6 +165,9 @@ class Grenade extends Sprite{
             this.yv+=0.3;
             this.y+=this.yv;
         } else {
+            if (Math.hypot(player.x-this.x, player.y-this.y)<DEATH_RANGE){
+                umer();
+            }
             this.delete_me = true;
         }
         this.draw()
@@ -224,6 +230,27 @@ function vyigral(){
     })
 }
 
+function umer(){
+    clearInterval(update_interval);
+    game.pause();
+    clearTimeout(govno);
+    spawnenemies = false;
+    ctx.drawImage(document.getElementById("actualdeathscreen"), 0, 0);
+    win.play();
+    document.addEventListener("keypress", (kp)=>{
+        if (kp.key === "Enter"){
+            //console.log("how");
+            window.location.reload();
+        }
+    })
+    //document.body.requestFullscreen("hide"); every browser is proprietary garbage that wont let me :(((((
+    document.body.style.animationName = "umer";
+    document.body.style.animationDuration = "0.1s";
+    document.body.style.animationIterationCount = "infinite";
+    new Audio("Screamer.mp3").play();
+    new Audio("FemurBreaker.ogg").play();
+}
+
 function Spawn(){
     if(!spawnenemies) return;
     marines.push(new Marine());
@@ -253,13 +280,14 @@ function update(){
     }
     explosions.forEach((v)=>{v.update()});
     rockets.forEach((v)=>{v.update()});
-    drones.forEach((v)=>{if(v){v.update()}});
+    drones.forEach((v)=>{if(v){v.update()}else{console.log(drones)}});
     grenades.forEach((v)=>{v.update()});
     RPG.draw();
     for (let r in rockets){
         for (let m in marines){
             if (rockets[r] === undefined || marines[m] === undefined) return;
             if (doCollide(rockets[r].getRect(), marines[m].getRect())){
+                popal++;
                 flySnd.pause();
                 flySnd.currentTime = 0;
                 explosionSnd.currentTime = 0;
@@ -281,7 +309,13 @@ function update(){
     dt = Date.now() - startT;
     ctx.font = "24px italic";
     ctx.fillStyle = "red";
-    ctx.fillText(`${Math.round(dt/1000)}/${Math.round(WIN_TIMEOUT/1000)}`, 10, 40);
+    let ratio;
+    if (launched==0){
+        ratio = "N/A";
+    } else {
+        ratio = Math.round(popal*100/launched)+"%";
+    }
+    ctx.fillText(`${Math.round(dt/1000)}/${Math.round(WIN_TIMEOUT/1000)} | ${popal}/${launched} (${ratio})`, 10, 40);
     for (m of marines){
         if (m.x < 150){
             game.pause();
@@ -295,8 +329,8 @@ function update(){
         }
         if (grenades[g].delete_me){
             explosions.push(new GrenadeExplosion(grenades[g].x, grenades[g].y));
-            [grenades[g], grenades[-1]] = [grenades[-1], grenades[g]];
-            grenades.pop();
+            [grenades[g], grenades[0]] = [grenades[0], grenades[g]];
+            grenades.shift();
             
         }
     }
@@ -305,8 +339,9 @@ function update(){
             break;
         }
         if (drones[d].x > 610){
-            [drones[d], drones[-1]] = [drones[-1], drones[d]];
-            drones.pop();
+            [drones[d], drones[0]] = [drones[0], drones[d]];
+            drones.shift();
+            break
         }
     }
     if (dt>WIN_TIMEOUT){
@@ -340,9 +375,9 @@ async function main(){
         game_over,
         win,
         story,
-        game,
         explosionSnd,
-        menusong
+        menusong,
+        game
     ].forEach(v=>v.volume = SOUND_VOL);
     menusong.play()
     await new Promise((res, rej)=>{
@@ -423,6 +458,7 @@ async function main(){
     document.addEventListener("keypress", (kp)=>{
         console.log(dt);
         if (kp.key === " " && canLaunch && dt<=WIN_TIMEOUT){
+            launched++;
             rockets.push(new Rocket());
             canLaunch = false;
             let unreadyrpg = new Image();
@@ -450,6 +486,7 @@ async function main(){
     .addEventListener("click", ()=>{
         console.log(dt);
         if (canLaunch && dt<=WIN_TIMEOUT){
+            launched++;
             rockets.push(new Rocket());
             canLaunch = false;
             let unreadyrpg = new Image();
