@@ -32,6 +32,7 @@ let walk2 = new Image();
 walk2.src = "walk2.png";
 let launched = 0;
 let popal = 0;
+let mx_corpses;
 
 const WIN_TIMEOUT = 180_000;
 
@@ -348,6 +349,9 @@ function update(){
         clearTimeout(govno);
         vyigral();
     }
+    if (corpses.length > mx_corpses){
+        corpses.shift();
+    }
 }
 
 const player = new Sprite(["stand.png"], 1, 0.04);
@@ -364,7 +368,9 @@ async function main(){
     running = true;
     console.log("Entered main()");
     document.querySelector("div#main p:nth-child(1)").remove();
-
+    showintro = !document.getElementById("skip_intro").checked;
+    console.log(`Show intro: ${showintro}`);
+    document.getElementById("settings").style.display = "none";
     ctx.drawImage(document.getElementById("menuscreen"), 0, 0);
     let menusong = new Audio("menu.mp3");
     //I hate myself.
@@ -500,6 +506,8 @@ async function main(){
             launchSnd.play();
             flySnd.play();
         }});
+    mx_corpses = document.getElementById("mx_corpses").value;
+    console.log(`Maximum corpses: ${mx_corpses}`);
 }
 
 canvas.addEventListener("click", ()=>setTimeout(main, 200));

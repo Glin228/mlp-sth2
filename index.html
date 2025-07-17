@@ -58,6 +58,19 @@
             from {background-color: black;}
             to {background-color: #EE0000;}
         }
+
+        #settings{
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            z-index: 1;
+            border: dashed white 1px;
+            max-width: 250px;
+        }
+
+        label p{
+            display: inline;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +80,13 @@
         <div id="upbtn"></div>
         <div id="downbtn"></div>
         <div id="firebtn"></div>
+    </div>
+    <div id="settings">
+        <p>Maximum corpses on scene: </p>
+        <input type="number" id="mx_corpses" value="50">
+        <br><hr>
+        <input type="checkbox" id="skip_intro">
+        <label for="skip_intro"><p>Skip intro?</p></label>
     </div>
     <img src="death_screen.jpg" style="display: none;" id="deathscreen">
     <img src="menu_screen.jpg" style="display: none;" id="menuscreen">
