@@ -14,6 +14,7 @@ const flySnd = new Audio("rocketfly.wav");
 const game_over = new Audio("game_over.mp3");
 const win = new Audio("win.mp3");
 const story = new Audio("story.mp3");
+const gib = new Audio("gib.mp3");
 let game = new Audio("game.mp3");
 let canLaunch = true;
 let pressedKeys = {};
@@ -292,6 +293,8 @@ function update(){
                 flySnd.currentTime = 0;
                 explosionSnd.currentTime = 0;
                 explosionSnd.play();
+                gib.currentTime = 0;
+                gib.play();
                 explosions.push(new Explosion(marines[m].x, marines[m].y));
                 [marines[m], marines[marines.length-1]] = [marines[marines.length-1], marines[m]];
                 corpses.push(new Sprite(["enemy_corpse.png"], 1, 0.7));
@@ -382,7 +385,8 @@ async function main(){
         story,
         explosionSnd,
         menusong,
-        game
+        game,
+        gib
     ].forEach(v=>v.volume = SOUND_VOL);
     menusong.play()
     await new Promise((res, rej)=>{
