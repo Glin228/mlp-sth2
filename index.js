@@ -15,7 +15,7 @@ const game_over = new Audio("game_over.mp3");
 const win = new Audio("win.mp3");
 const story = new Audio("story.mp3");
 const gib = new Audio("gib.mp3");
-let game = new Audio("game.mp3");
+let game = new Audio("blitzkrieg.mp3");
 let canLaunch = true;
 let pressedKeys = {};
 const explosionSnd = new Audio("explosion.mp3");
@@ -258,6 +258,24 @@ function Spawn(){
     setTimeout(Spawn, Math.random()*ENEMY_SPAWN_DELTA+ENEMY_SPAWN_MIN);
 }
 
+async function printf(txt){
+    let textp = document.getElementById("storytext");
+    textp.innerHTML = txt[0];
+    for (let l of txt.slice(1)){
+        if (l === "\n"){
+            textp.innerHTML+="<br>";
+            continue;
+        }
+        await new Promise((res, rej)=>{
+            setTimeout(res, 50);
+        });
+        textp.innerHTML+=l;
+    }
+    await new Promise((res, rej)=>{
+        setTimeout(res, 500);
+    });
+}
+
 function update(){
     RPG.x = player.x;
     RPG.y = player.y-10;
@@ -401,40 +419,33 @@ async function main(){
     menusong.pause();
     if (showintro){
     story.play();
-    setTimeout(()=>{
-        let slide = new Image();
-        slide.src = "story/1.png";
-        slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 1000);
-    setTimeout(()=>{
-        let slide = new Image();
-        slide.src = "story/2.jpg";
-        slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 16000);
-    setTimeout(()=>{
-        let slide = new Image();
-        slide.src = "story/3.jpg";
-        slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 31000);
-    setTimeout(()=>{
-        let slide = new Image();
-        slide.src = "story/4.jpg";
-        slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 46000);
-    setTimeout(()=>{
-        let slide = new Image();
-        slide.src = "story/5.jpg";
-        slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 61000);
-    setTimeout(()=>{
-        let slide = new Image();
-        slide.src = "story/6.jpg";
-        slide.onload = ()=>ctx.drawImage(slide, 0, 0);
-    }, 76000);
+    
+    ctx.fillRect(0, 0, screen.width, screen.height, "black");
+    const putimage = (src) => {
+        return new Promise((res, rej)=>{
+            let i = new Image();
+            i.src = src;
+            i.onload = () => {
+                ctx.fillRect(0, 0, 600, 600, "black");
+                ctx.drawImage(i, 0, 0);
+                res();
+            };
+        });
+    }
+    await putimage("cringe.jpg");
+    await printf("Since the very beginning of brony fandom,\nbronies were not welcome anywhere");
+    await printf("They were always trolled and bullied simply\nfor liking what they are not\nsupposed to.");
+    await putimage("heresy.png");
+    await printf("Countless images of space marines killing\nlittle ponies were created during 2010s.");
+    await putimage("combo.png");
+    await printf("Of course, ponies were drawn being killed\nby not only space marines");
+    await printf("But at least 50% of MLP hatedom artwork\n consist of images of ponies being\n killed by these blue guys.");
+    await putimage("trash.webp");
+    await printf("However now ponyhaters use AI to create\nsuch images and videos.");
+    await printf("Stop pretending that haters don't exist\nand start fighting them!");
+    document.getElementById("storytext").remove();
 
-    await new Promise((res, rej)=>{
-        setTimeout(res, 76000);
-    });
+
     } else {
         let slide = new Image();
         slide.src = "story/6.jpg";
